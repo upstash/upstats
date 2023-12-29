@@ -12,6 +12,7 @@
     "@radix-ui/react-separator": "^1.0.3",
     "@upstash/qstash": "^2.3.0",
     "@upstash/redis": "^1.27.1",
+    "axios": "^1.6.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "lucide-react": "^0.302.0",
