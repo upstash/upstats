@@ -11,7 +11,10 @@ export default function Home() {
           This application is using QStash for serverless task scheduling, and
           Upstash Redis for storing the state. <br /> You can see the Github
           repository{" "}
-          <a href="https://github.com" className="font-bold text-blue-500">
+          <a
+            href="https://github.com/fahreddinozcan/upstats"
+            className="font-bold text-blue-500"
+          >
             here
           </a>{" "}
           to learn how to utilize Upstash products with Next.js Server Side
