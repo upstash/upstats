@@ -9,9 +9,9 @@ export const CustomTooltip = ({
   label,
   interval,
 }: {
-  active: any;
-  payload: any;
-  label: any;
+  active?: any;
+  payload?: any;
+  label?: any;
   interval: Interval;
 }) => {
   if (active && payload && payload.length) {
