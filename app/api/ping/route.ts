@@ -5,9 +5,6 @@ import { RedisClient } from "@/lib/redis-client";
 
 const redis = RedisClient();
 
-// export const POST = verifySignatureEdge(handler);
-
-// async function handler(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const { url } = await request.json();
 
@@ -29,8 +26,6 @@ export async function POST(request: NextRequest) {
     ping: pingTime,
     status: status,
   };
-
-  console.log(statusData);
 
   await redis.zadd(`daily_status:${url}`, {
     score: currentTime,
