@@ -146,8 +146,6 @@ export function useStatusData({ url }: { url: string }) {
     date.setHours(0, 0, 0, 0);
     const dayKey = date.getTime();
 
-    console.log("day", date);
-
     const dailyAverageData = {
       avg_ping: dailyAverage.toFixed(0),
       totalCheck: totalCheck,
@@ -184,8 +182,6 @@ export function useStatusData({ url }: { url: string }) {
     const path = `$.${endTime}`;
 
     const result = await redis.json.get(`daily_status_json:${url}`, path);
-
-    console.log(result);
 
     const newMonthlyAverageData = monthlyAverage.slice(0, -1);
 
