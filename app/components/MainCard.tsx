@@ -10,7 +10,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useStatusData } from "../hooks/useStatusData";
-import { Spinner } from "./icons/spinner";
 
 import { CheckIcon } from "./icons/check-icon";
 import { AlertIcon } from "./icons/alert-icon";
@@ -23,39 +22,18 @@ function formatUrl(url: string) {
 
 export const MainCard = () => {
   const url = process.env.NEXT_PUBLIC_URL_TO_CHECK || " ";
-  const { getStatusData, dailyStatusData, monthlyAverage, isOperational } =
-    useStatusData({ url });
+  const { dailyStatusData, monthlyAverage, isOperational } = useStatusData({
+    url,
+  });
 
   return (
     <div className="flex flex-col items-center w-full h-full">
-      <div className="flex flex-row items-center w-6/12 gap-4 mb-4 text-4xl font-bold text-center">
+      <div className="flex flex-row items-center gap-4 mx-auto mb-4 text-4xl font-bold text-center w-[48rem]">
         {formatUrl(url)}
         {<OperationStatusBand isOperational={isOperational} />}
       </div>
-      <Card className="w-6/12 py-4 border-slate-400 rounded-xl">
+      <Card className="py-4 mx-auto w-[48rem] border-slate-400 rounded-xl">
         <CardContent>
-          {/* <button
-            className="border border-black"
-            onClick={async () => {
-              const res = await fetch("/api/ping", {
-                method: "POST",
-                body: JSON.stringify({
-                  url: "https://www.upstash.com",
-                }),
-              });
-              console.log(res);
-            }}
-          >
-            Send
-          </button> */}
-          {/* <button
-            className="border border-black"
-            onClick={async () => {
-              await getStatusData();
-            }}
-          >
-            GET DATA
-          </button> */}
           <StatusRow data={monthlyAverage} interval="Monthly" />
           <Separator className="my-4 text-black" />
           <StatusRow data={dailyStatusData} interval="Recently" />

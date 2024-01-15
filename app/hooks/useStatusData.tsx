@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 import { RedisClient } from "@/lib/redis-client";
-import { get } from "http";
-import { start } from "repl";
 
 const redis = RedisClient();
 

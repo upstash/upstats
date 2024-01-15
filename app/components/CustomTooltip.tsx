@@ -22,11 +22,11 @@ export const CustomTooltip = ({
 
     const date = new Date(parseInt(time));
 
-    const year = date.getUTCFullYear();
-    const month = (date.getUTCMonth() + 1).toString().padStart(2, "0");
-    const day = (date.getUTCDate() + 1).toString().padStart(2, "0");
-    const hours = date.getUTCHours().toString().padStart(2, "0");
-    const minutes = date.getUTCMinutes().toString().padStart(2, "0");
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
 
     const formattedTime = `${hours}:${minutes}`;
     const formattedDate = `${day}/${month}/${year}`;
@@ -38,7 +38,7 @@ export const CustomTooltip = ({
     };
 
     if (!status) {
-      status == totalCheck > 0
+      status === totalCheck > 0
         ? "missing"
         : (totalCheck * 3) / 4 < successfulCheck
         ? "success"
@@ -79,7 +79,7 @@ export const CustomTooltip = ({
             </div>
           </>
         )}
-        {status != "missing" && interval == "Recently" && (
+        {status !== "missing" && interval === "Recently" && (
           <div className="flex flex-row gap-4">
             <p>{formattedTime}</p>
             <p>
