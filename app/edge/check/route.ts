@@ -2,13 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifySignatureEdge } from "@upstash/qstash/dist/nextjs";
 import axios from "axios";
 import { RedisClient } from "lib/redis-client";
-import { ResponseStatusType } from "lib/types";
-
-type StatusDataType = {
-  time: string;
-  ping: number;
-  status: ResponseStatusType;
-};
+import { ResponseStatusType, StatusDataType } from "lib/types";
 
 const redis = RedisClient();
 
