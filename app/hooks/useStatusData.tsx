@@ -1,77 +1,36 @@
 import { useEffect, useState } from "react";
-import { RedisClient } from "@/lib/redis-client";
+import {
+  DailyStatusDataType,
+  MonthlyStatusDataType,
+  ResponseStatusType,
+  StatusDataType,
+} from "lib/types";
+import { RedisClient } from "lib/redis-client";
 
 const redis = RedisClient();
 
-type StatusType = "success" | "fail" | "missing";
-
-type StatusDataType = {
-  time: string;
-  ping: number;
-  status: StatusType;
+const defaultData: DailyStatusDataType = {
+  name: "status_data",
+  pv: 2400,
+  ping: 0,
+  time: "0",
+  status: ResponseStatusType.MISSING,
 };
 
-type DailyStatusDataType = {
-  name: string;
-  pv: number;
-  ping: number;
-  time: string;
-  status: StatusType;
-};
-
-type MonthlyStatusDataType = {
-  time: string;
-  pv: number;
-  avg_ping: string;
-  totalCheck: number;
-  successfulCheck: number;
-  status: StatusType;
-};
+/**
+ * useStatusData
+ * @param url
+ */
 
 export function useStatusData({ url }: { url: string }) {
   const [dailyStatusData, setDailyStatusData] = useState<DailyStatusDataType[]>(
-    []
+    [],
   );
   const [monthlyAverage, setMonthlyAverage] = useState<MonthlyStatusDataType[]>(
-    []
+    [],
   );
 
-  const [isOperational, setIsOperational] = useState<boolean>(true);
-
-  const getStatusData = async () => {
-    if (!url) {
-      fillMockData();
-      return;
-    }
-    getDailyStatusData();
-    await getDailyAverage(new Date().toISOString());
-    await getMonthlyData(new Date().toISOString());
-  };
-
-  useEffect(() => {
-    if (!url) {
-      fillMockData();
-      return;
-    }
-    const init = async () => {
-      await getDailyStatusData();
-      await getMonthlyData(new Date().toISOString());
-    };
-    init();
-  }, []);
-
-  useEffect(() => {
-    const intervalID = setInterval(getStatusData, 1000 * 60 * 10);
-    return () => clearInterval(intervalID);
-  });
-
-  const defaultData: DailyStatusDataType = {
-    name: "status_data",
-    pv: 2400,
-    ping: 0,
-    time: "0",
-    status: "missing",
-  };
+  const [isOperational, setIsOperational] = useState<boolean>(false);
 
   const getDailyStatusData = async () => {
     const startOfDay = new Date();
@@ -88,7 +47,7 @@ export function useStatusData({ url }: { url: string }) {
       endTime,
       {
         byScore: true,
-      }
+      },
     );
 
     const newDailyStatusData = [];
@@ -106,10 +65,11 @@ export function useStatusData({ url }: { url: string }) {
     let dailyAverageSum = 0;
     let dailyTotalCheck = 0;
     let dailySuccessfulCheck = 0;
+
     result.forEach((data: StatusDataType) => {
       dailyAverageSum += data.ping;
       dailyTotalCheck += 1;
-      if (data.status === "success") {
+      if (data.status === ResponseStatusType.SUCCESS) {
         dailySuccessfulCheck += 1;
       }
     });
@@ -123,14 +83,15 @@ export function useStatusData({ url }: { url: string }) {
     setDailyStatusData(newDailyStatusData.reverse());
 
     setIsOperational(
-      newDailyStatusData.at(newDailyStatusData.length - 1)?.status === "success"
+      newDailyStatusData.at(newDailyStatusData.length - 1)?.status ===
+        ResponseStatusType.SUCCESS,
     );
 
     setDailyAverage(
       dailyAverage,
       dailyTotalCheck,
       dailySuccessfulCheck,
-      new Date().toISOString()
+      new Date().toISOString(),
     );
     return result;
   };
@@ -139,7 +100,7 @@ export function useStatusData({ url }: { url: string }) {
     dailyAverage: number,
     totalCheck: number,
     successfulCheck: number,
-    time: string
+    time: string,
   ) => {
     const date = new Date(time);
 
@@ -152,15 +113,15 @@ export function useStatusData({ url }: { url: string }) {
       successfulCheck: successfulCheck,
       status:
         totalCheck == 0
-          ? "missing"
+          ? ResponseStatusType.MISSING
           : (totalCheck * 3) / 4 < successfulCheck
-          ? "success"
-          : "fail",
+            ? ResponseStatusType.SUCCESS
+            : ResponseStatusType.FAIL,
     };
 
     const jsonExists = await redis.json.type(
       `daily_status_json:${url}`,
-      `$.${dayKey}`
+      `$.${dayKey}`,
     );
 
     if (!jsonExists) {
@@ -169,7 +130,7 @@ export function useStatusData({ url }: { url: string }) {
     await redis.json.set(
       `daily_status_json:${url}`,
       `$.${dayKey}`,
-      JSON.stringify(dailyAverageData)
+      JSON.stringify(dailyAverageData),
     );
   };
 
@@ -222,7 +183,7 @@ export function useStatusData({ url }: { url: string }) {
           successfulCheck: result[0][key].successfulCheck,
           status: result[0][key].status,
         };
-      }
+      },
     );
 
     newMonthlyData
@@ -236,7 +197,7 @@ export function useStatusData({ url }: { url: string }) {
         avg_ping: "0",
         totalCheck: 0,
         successfulCheck: 0,
-        status: "missing",
+        status: ResponseStatusType.MISSING,
       });
     }
 
@@ -255,10 +216,37 @@ export function useStatusData({ url }: { url: string }) {
         avg_ping: "0",
         totalCheck: 0,
         successfulCheck: 0,
-        status: "missing",
+        status: ResponseStatusType.MISSING,
       });
     }
   };
+
+  const getStatusData = async () => {
+    if (!url) {
+      fillMockData();
+      return;
+    }
+
+    getDailyStatusData();
+
+    await getDailyAverage(new Date().toISOString());
+    await getMonthlyData(new Date().toISOString());
+  };
+
+  const init = async () => {
+    await getDailyStatusData();
+    await getMonthlyData(new Date().toISOString());
+  };
+
+  useEffect(() => {
+    if (!url) return fillMockData();
+    init();
+  }, []);
+
+  useEffect(() => {
+    const intervalID = setInterval(getStatusData, 1000 * 60 * 10);
+    return () => clearInterval(intervalID);
+  }, []);
 
   return { getStatusData, dailyStatusData, monthlyAverage, isOperational };
 }

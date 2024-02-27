@@ -1,13 +1,13 @@
-import { NextResponse, NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { verifySignatureEdge } from "@upstash/qstash/dist/nextjs";
 import axios from "axios";
-import { RedisClient } from "@/lib/redis-client";
+import { RedisClient } from "lib/redis-client";
+import { ResponseStatusType } from "lib/types";
 
-type StatusType = "success" | "fail" | "missing";
 type StatusDataType = {
   time: string;
   ping: number;
-  status: StatusType;
+  status: ResponseStatusType;
 };
 
 const redis = RedisClient();
@@ -22,7 +22,8 @@ async function handler(request: NextRequest) {
   const res = await axios.get(`${url}`);
   const pingTime = Date.now() - currentTime;
 
-  const status: StatusType = res.status === 200 ? "success" : "fail";
+  const status =
+    res.status === 200 ? ResponseStatusType.SUCCESS : ResponseStatusType.FAIL;
 
   const statusData: StatusDataType = {
     time: currentTime.toString(),
@@ -40,7 +41,7 @@ async function handler(request: NextRequest) {
   await redis.zremrangebyscore(
     `daily_status:${url}`,
     0,
-    currentTime - retentionPeriod
+    currentTime - retentionPeriod,
   );
 
   return NextResponse.json(statusData);

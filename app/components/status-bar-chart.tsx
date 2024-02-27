@@ -1,8 +1,8 @@
 import React from "react";
-import { BarChart, Bar, Cell, Tooltip, ResponsiveContainer } from "recharts";
-import { CustomTooltip } from "./CustomTooltip";
+import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import { CustomTooltip } from "./custom-tooltip";
+import { Interval, ResponseStatusType } from "lib/types";
 
-type Interval = "Monthly" | "Recently";
 export const StatusBarChart = ({
   data,
   interval,
@@ -11,9 +11,9 @@ export const StatusBarChart = ({
   interval: Interval;
 }) => {
   const getColor = (value: any) => {
-    if (value === "success") return "#10b98190";
-    if (value === "fail") return "#ef444490";
-    if (value === "missing") return "#d4d4d890";
+    if (value === ResponseStatusType.SUCCESS) return "#10b98190";
+    if (value === ResponseStatusType.FAIL) return "#ef444490";
+    if (value === ResponseStatusType.MISSING) return "#d4d4d890";
     return "#d4d4d890";
   };
 

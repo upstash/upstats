@@ -1,8 +1,6 @@
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "./ui/separator";
+import { Interval, ResponseStatusType } from "lib/types";
 
-type Interval = "Recently" | "Monthly";
-
-type PingState = "success" | "fail" | "missing";
 export const CustomTooltip = ({
   active,
   payload,
@@ -14,11 +12,11 @@ export const CustomTooltip = ({
   label?: any;
   interval: Interval;
 }) => {
-  if (active && payload && payload.length) {
+  if (!active && !payload && payload.length) {
     const { value, time, ping, avg_ping, totalCheck, successfulCheck } =
       payload[0].payload;
 
-    const status = payload[0].payload.status as PingState;
+    const status = payload[0].payload.status as ResponseStatusType;
 
     const date = new Date(parseInt(time));
 
@@ -31,35 +29,39 @@ export const CustomTooltip = ({
     const formattedTime = `${hours}:${minutes}`;
     const formattedDate = `${day}/${month}/${year}`;
 
-    const tooltipMessage: Record<PingState, string> = {
+    const tooltipMessage: Record<ResponseStatusType, string> = {
       success: "Successful",
       fail: "Failed",
       missing: "Missing Data",
     };
 
     if (!status) {
-      status === totalCheck > 0
-        ? "missing"
-        : (totalCheck * 3) / 4 < successfulCheck
-        ? "success"
-        : "fail";
+      if (status === totalCheck > 0) {
+        return ResponseStatusType.MISSING;
+      } else {
+        if ((totalCheck * 3) / 4 < successfulCheck) {
+          return ResponseStatusType.SUCCESS;
+        } else {
+          return ResponseStatusType.FAIL;
+        }
+      }
     }
 
     return (
       <div className="flex flex-col gap-2 p-2 ml-4 text-sm border rounded-lg bg-slate-50 border-slate-200 ">
         <p
           className={`${
-            status === "success"
+            status === ResponseStatusType.SUCCESS
               ? "text-emerald-500"
-              : status === "fail"
-              ? "text-red-500"
-              : "text-yellow-500"
+              : status === ResponseStatusType.FAIL
+                ? "text-red-500"
+                : "text-yellow-500"
           }
 		  `}
         >
           {tooltipMessage[status]}
         </p>
-        {status != "missing" && interval == "Monthly" && (
+        {status != ResponseStatusType.MISSING && interval == "Monthly" && (
           <>
             <div className="flex flex-row gap-4">
               <p>{time === "0" ? "00/00/0000" : formattedDate}</p>
