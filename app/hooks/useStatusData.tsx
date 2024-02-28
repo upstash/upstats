@@ -74,7 +74,8 @@ export function useStatusData({ url }: { url: string }) {
       }
     });
 
-    const dailyAverage = dailyAverageSum / result.length;
+    const dailyAverage =
+      result.length > 0 ? dailyAverageSum / result.length : 0;
 
     while (newDailyStatusData.length < 30) {
       newDailyStatusData.push(defaultData);
@@ -174,7 +175,6 @@ export function useStatusData({ url }: { url: string }) {
 
     const newMonthlyData: MonthlyStatusDataType[] = Object.keys(result[0]).map(
       (key) => {
-        console.log(key, today);
         return {
           time: key,
           pv: 2400,
@@ -239,7 +239,10 @@ export function useStatusData({ url }: { url: string }) {
   };
 
   useEffect(() => {
-    if (!url) return fillMockData();
+    if (!url) {
+      return fillMockData();
+    }
+
     init();
   }, []);
 
@@ -248,5 +251,5 @@ export function useStatusData({ url }: { url: string }) {
     return () => clearInterval(intervalID);
   }, []);
 
-  return { getStatusData, dailyStatusData, monthlyAverage, isOperational };
+  return { dailyStatusData, monthlyAverage, isOperational };
 }
